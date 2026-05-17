@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to `discord.js-toolbox` are documented here.
- 
+
 ---
 
 ## v1.1.1

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `discord.js-toolbox` are documented here.
+All notable changes to `discord.js-toolbox` are documented here. 
 
 ---
 

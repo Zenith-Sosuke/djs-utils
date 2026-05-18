@@ -138,7 +138,31 @@ function stripMarkdown(str) {
   return str.replace(/(\*|_|~|`|>|\\)/g, '');
 }
 
-
+/**
+ * Formats an array into a readable list string
+ * @param {string[]} items
+ * @param {'bullet'|'numbered'|'inline'} [style='bullet']
+ * @returns {string}
+ *
+ * @example
+ * formatList(['Alice', 'Bob', 'Carol'])
+ * // → "• Alice\n• Bob\n• Carol"
+ *
+ * formatList(['Alice', 'Bob', 'Carol'], 'numbered')
+ * // → "1. Alice\n2. Bob\n3. Carol"
+ *
+ * formatList(['Alice', 'Bob', 'Carol'], 'inline')
+ * // → "Alice, Bob and Carol"
+ */
+function formatList(items, style = 'bullet') {
+  if (!items.length) return '';
+  if (style === 'numbered') return items.map((item, i) => `${i + 1}. ${item}`).join('\n');
+  if (style === 'inline') {
+    if (items.length === 1) return items[0];
+    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+  }
+  return items.map((item) => `• ${item}`).join('\n');
+}
 
 module.exports = {
   truncate,
@@ -154,5 +178,6 @@ module.exports = {
   inlineCode,
   formatBytes,
   padStart,
-  pluralize
+  pluralize,
+  formatList,
 };

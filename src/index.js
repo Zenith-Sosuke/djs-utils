@@ -45,4 +45,7 @@ module.exports = {
 
   // String sanitization
   ...require('./utils/sanitize'),
+
+  // Button menu
+  ...require('./buttonMenu'),
 };

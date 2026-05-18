@@ -275,6 +275,74 @@ function buildFieldPages(fields, baseOptions = {}, fieldsPerPage = 6) {
   return pages;
 }
 
+
+/**
+ * Sends a confirm/cancel prompt and waits for the user to click.
+ * Automatically disables buttons after a response or timeout.
+ *
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {object} options
+ * @param {string}        options.question                  - The prompt text shown in the embed.
+ * @param {string}        [options.confirmLabel='Confirm']
+ * @param {string}        [options.cancelLabel='Cancel']
+ * @param {number}        [options.timeout=15000]           - Ms before auto-cancelling.
+ * @param {boolean}       [options.ephemeral=false]
+ * @returns {Promise<boolean>} true if confirmed, false if cancelled or timed out.
+ *
+ * @example
+ * const confirmed = await confirmAction(interaction, {
+ *   question: 'Are you sure you want to ban this user?',
+ *   confirmLabel: 'Yes, ban them',
+ * });
+ * if (!confirmed) return;
+ * await safeBan(target, reason);
+ */
+async function confirmAction(interaction, {
+  question,
+  confirmLabel = 'Confirm',
+  cancelLabel  = 'Cancel',
+  timeout      = 15_000,
+  ephemeral    = false,
+} = {}) {
+  const { warnEmbed, errorEmbed } = require('./embeds');
+
+  const row = buildConfirmRow({ confirmLabel, cancelLabel });
+
+  const reply = await interaction.reply({
+    embeds: [warnEmbed(question)],
+    components: [row],
+    ephemeral,
+    fetchReply: true,
+  });
+
+  try {
+    const i = await reply.awaitMessageComponent({
+      filter: (btn) => btn.user.id === interaction.user.id,
+      time: timeout,
+    });
+
+    const confirmed = i.customId === 'confirm';
+
+    await i.update({
+      embeds: [confirmed
+        ? warnEmbed(question)
+        : errorEmbed('Action cancelled.')
+      ],
+      components: [disableRow(row)],
+    });
+
+    return confirmed;
+  } catch {
+    // Timed out
+    await interaction.editReply({
+      embeds: [errorEmbed('Confirmation timed out.')],
+      components: [disableRow(row)],
+    });
+    return false;
+  }
+}
+
+
 module.exports = {
   // Buttons
   buildButton,
@@ -288,4 +356,6 @@ module.exports = {
   // Embed containers
   buildCard,
   buildFieldPages,
+  // Confirm prompt
+  confirmAction,
 };

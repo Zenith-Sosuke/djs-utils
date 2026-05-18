@@ -136,14 +136,132 @@ async function safeUnban(guild, userId, reason) {
   }
 }
 
+/**
+ * Attempts to add a role to a member
+ * @param {GuildMember} member
+ * @param {Role|string} role - Role object or role ID
+ * @param {string} reason
+ * @returns {Promise<{ success: boolean, error: string|null }>}
+ */
+async function safeRoleAdd(member, role, reason) {
+  try {
+    await member.roles.add(role, reason);
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Attempts to remove a role from a member
+ * @param {GuildMember} member
+ * @param {Role|string} role - Role object or role ID
+ * @param {string} reason
+ * @returns {Promise<{ success: boolean, error: string|null }>}
+ */
+async function safeRoleRemove(member, role, reason) {
+  try {
+    await member.roles.remove(role, reason);
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Attempts to server-deafen a member in a voice channel
+ * @param {GuildMember} member
+ * @param {string} reason
+ * @returns {Promise<{ success: boolean, error: string|null }>}
+ */
+async function safeDeafen(member, reason) {
+  if (!member.voice?.channel) {
+    return { success: false, error: 'Member is not in a voice channel.' };
+  }
+  try {
+    await member.voice.setDeaf(true, reason);
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Attempts to remove server-deafen from a member in a voice channel
+ * @param {GuildMember} member
+ * @param {string} reason
+ * @returns {Promise<{ success: boolean, error: string|null }>}
+ */
+async function safeUndeafen(member, reason) {
+  if (!member.voice?.channel) {
+    return { success: false, error: 'Member is not in a voice channel.' };
+  }
+  try {
+    await member.voice.setDeaf(false, reason);
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * In-memory warning store. Warns are lost on bot restart.
+ * For persistence, integrate your own database on top of this.
+ */
+const _warns = new Map(); // guildId:userId → warn[]
+
+/**
+ * Adds a warning to a member and returns their updated warn list
+ * @param {GuildMember} member
+ * @param {string} reason
+ * @param {GuildMember} moderator
+ * @returns {{ id: number, reason: string, moderatorId: string, timestamp: number }[]}
+ */
+function warnUser(member, reason, moderator) {
+  const key = `${member.guild.id}:${member.id}`;
+  if (!_warns.has(key)) _warns.set(key, []);
+  const warns = _warns.get(key);
+  warns.push({
+    id: warns.length + 1,
+    reason,
+    moderatorId: moderator.id,
+    timestamp: Date.now(),
+  });
+  return warns;
+}
+
+/**
+ * Gets all warnings for a member
+ * @param {GuildMember} member
+ * @returns {{ id: number, reason: string, moderatorId: string, timestamp: number }[]}
+ */
+function getWarns(member) {
+  return _warns.get(`${member.guild.id}:${member.id}`) ?? [];
+}
+
+/**
+ * Clears all warnings for a member
+ * @param {GuildMember} member
+ * @returns {void}
+ */
+function clearWarns(member) {
+  _warns.delete(`${member.guild.id}:${member.id}`);
+}
 
 module.exports = {
   parseDuration,
   formatDuration,
   canModerate,
   dmUser,
-  safeUnban,
   safeBan,
   safeKick,
   safeTimeout,
+  safeUnban,
+  safeRoleAdd,
+  safeRoleRemove,
+  safeDeafen,
+  safeUndeafen,
+  warnUser,
+  getWarns,
+  clearWarns,
 };

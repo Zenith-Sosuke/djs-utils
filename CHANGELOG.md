@@ -3,6 +3,26 @@
 All notable changes to `discord.js-toolbox` are documented here.
 
 ---
+## v1.2.0
+### Moderation
+- Added `safeRoleAdd(member, role, reason)` — safely adds a role with error handling.
+- Added `safeRoleRemove(member, role, reason)` — safely removes a role with error handling.
+- Added `safeDeafen(member, reason)` — server-deafens a member in a voice channel.
+- Added `safeUndeafen(member, reason)` — removes server-deafen from a member.
+- Added `warnUser(member, reason, moderator)` — adds an in-memory warning to a member.
+- Added `getWarns(member)` — returns all warnings for a member.
+- Added `clearWarns(member)` — clears all warnings for a member.
+
+### Formatters
+- Added `formatList(items, style)` — formats an array into a bullet, numbered, or inline list string.
+
+### Builders
+- Added `confirmAction(interaction, options)` — sends a confirm/cancel prompt and awaits the user's response. Auto-disables buttons on timeout.
+
+### Button Menu
+- Added `buttonMenu(interaction, options)` — interactive button menu system with per-button callbacks. Supports both classic embed mode and Components V2 container mode.
+
+---
 
 ## v1.1.1
 

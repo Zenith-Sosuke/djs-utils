@@ -1,6 +1,6 @@
 {
   "name": "discord.js-toolbox",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A utility library for Discord.js v14 bots — embeds, moderation helpers, pagination, formatters, logging, builders, and more.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
